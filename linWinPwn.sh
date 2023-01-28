@@ -42,9 +42,14 @@ if [ ! -f "${impacket_goldenPac}" ]; then impacket_goldenPac=$(which impacket-go
 enum4linux_py=$(which enum4linux-ng)
 if [ ! -f "${enum4linux_py}" ]; then enum4linux_py="${scripts_dir}/enum4linux-ng.py"; fi
 bloodhound=$(which bloodhound-python)
+if [ ! -f "${bloodhound}" ]; then bloodhound=$(which bloodhound.py); fi
+bloodhound-quickwin="${scripts_dir}/bhqc.py"
 ldapdomaindump=$(which ldapdomaindump)
+neo4j=$(which neo4j)
 crackmapexec=$(which crackmapexec)
+if [ ! -f "${crackmapexec}" ]; then crackmapexec=$(which cme); fi
 john=$(which john)
+hashcat=$(which hashcat)
 smbmap=$(which smbmap)
 nmap=$(which nmap)
 adidnsdump=$(which adidnsdump)
@@ -52,6 +57,8 @@ certi_py=$(which certi.py)
 certipy=$(which certipy)
 ldeep=$(which ldeep)
 donpapi_dir="$scripts_dir/DonPAPI-main"
+
+
 
 print_banner () {
     echo -e "
@@ -394,6 +401,39 @@ bhd_enum_dconly () {
                 current_dir=$(pwd)
                 cd ${output_dir}/DomainRecon/BloodHound
                 ${bloodhound} -d ${dc_domain} ${argument_bhd} -c DCOnly -ns ${dc_ip} --dns-timeout 5 --dns-tcp --zip
+                cd ${current_dir}
+            fi
+        fi
+    fi
+    echo -e ""
+}
+
+bhqc () {
+    if [ ! -f "${bloodhound-quickwin}" ] ; then
+        echo -e "${RED}[-] Please verify the installation of bloodhound-quickwin${NC}"
+    elif [ ! -f "${neo4j}" ] ; then
+        echo -e "${RED}[-] Please verify the installation of neo4j${NC}"
+    else
+        echo -e "${BLUE}[*] BloodHound Enumeration using Bloodhound-Quickwin(CLI) x Neo4j${NC}"
+        if [ -n "$(ls -A ${output_dir}/DomainRecon/BloodHound/ 2>/dev/null)" ] ; then
+            echo -e "${YELLOW}[i] BloodHound results found.${NC}"
+            cd ${output_dir}/DomainRecon/BloodHound
+            zip_files=($(ls -1 *.zip))
+            for i in "${!zip_files[@]}"
+            do
+            echo "$((i+1)) ${zip_files[i]}"
+            done
+            echo -e "${YELLOW}[i] Enter the number of the file you would like to choose:${NC}"
+            read file_number
+            selected_file=${zip_files[file_number-1]}
+            echo -e "${YELLOW}[i] Launching Neo4j${NC}"
+        else
+            if [ "${nullsess_bool}" == true ] ; then
+                echo -e "${PURPLE}[-] Bloodhound-Quickwin requires credentials${NC}"
+            else
+                current_dir=$(pwd)
+                cd ${output_dir}/DomainRecon/BloodHound
+                ${bloodhound-quickwin} -u neo4j -p neo4j
                 cd ${current_dir}
             fi
         fi
@@ -1437,18 +1477,19 @@ ad_menu () {
     echo -e "A) ALL ACTIVE DIRECTORY ENUMERATIONS"
     echo -e "1) BloodHound Enumeration using all collection methods (Noisy!)"
     echo -e "2) BloodHound Enumeration using DCOnly"
-    echo -e "3) ldapdomaindump LDAP Enumeration"
-    echo -e "4) enum4linux-ng LDAP-MS-RPC Enumeration"
-    echo -e "5) MS-RPC Enumeration using crackmapexec (Users, pass pol, GPP)"
-    echo -e "6) LDAP Enumeration using crackmapexec (Users, passnotreq, ADCS, userdesc, maq, ldap-signing, deleg, subnets)"
-    echo -e "7) RID Brute Force (Null session) using crackmapexec"
-    echo -e "8) User=Pass check using crackmapexec (Noisy!)"
-    echo -e "9) Delegation Enumeration using findDelegation"
-    echo -e "10) certi.py ADCS Enumeration"
-    echo -e "11) Certipy ADCS Enumeration"
-    echo -e "12) SilentHound LDAP Enumeration"
-    echo -e "13) windapsearch LDAP Enumeration"
-    echo -e "14) ldeep LDAP Enumeration"
+    echo -e "3) BloodHound-Quickwin Enumeration (CLI)"
+    echo -e "4) ldapdomaindump LDAP Enumeration"
+    echo -e "5) enum4linux-ng LDAP-MS-RPC Enumeration"
+    echo -e "6) MS-RPC Enumeration using crackmapexec (Users, pass pol, GPP)"
+    echo -e "7) LDAP Enumeration using crackmapexec (Users, passnotreq, ADCS, userdesc, maq, ldap-signing, deleg, subnets)"
+    echo -e "8) RID Brute Force (Null session) using crackmapexec"
+    echo -e "9) User=Pass check using crackmapexec (Noisy!)"
+    echo -e "10) Delegation Enumeration using findDelegation"
+    echo -e "11) certi.py ADCS Enumeration"
+    echo -e "12) Certipy ADCS Enumeration"
+    echo -e "13) SilentHound LDAP Enumeration"
+    echo -e "14) windapsearch LDAP Enumeration"
+    echo -e "15) ldeep LDAP Enumeration"
     echo -e "99) Back"
 
     read -p "> " option_selected </dev/tty
@@ -1470,54 +1511,59 @@ ad_menu () {
         ;;
 
         3)
-        ldapdomaindump_enum
+        bhqc
         ad_menu
         ;;
 
         4)
-        enum4linux_enum
+        ldapdomaindump_enum
         ad_menu
         ;;
 
         5)
+        enum4linux_enum
+        ad_menu
+        ;;
+
+        6)
         cme_rpc_enum
         ad_menu;;
 
-        6)
+        7)
         cme_ldap_enum
         ad_menu;;
 
-        7)
+        8)
         ridbrute_attack
         ad_menu;;
 
-        8)
+        9)
         userpass_cme_check
         ad_menu;;
 
-        9)
+        10)
         deleg_enum_imp
         ad_menu;;
 
-        10)
+        11)
         certi_py_enum
         ad_menu;;
 
-        11)
+        12)
         certipy_enum
         ad_menu;;
 
-        12)
+        13)
         silenthound_enum
         ad_menu
         ;;
 
-        13)
+        14)
         windapsearch_enum
         ad_menu
         ;;
 
-        14)
+        15)
         ldeep_enum
         ad_menu
         ;;
