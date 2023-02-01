@@ -26,7 +26,8 @@ install_tools() {
     pipx install git+https://github.com/ly4k/Certipy.git --force
     pipx install git+https://github.com/fox-it/BloodHound.py.git --force
     pipx install git+https://github.com/franc-pentest/ldeep.git --force
-
+    pipx install git+https://github.com/garrettfoster13/pre2k.git --force
+    pipx install git+https://github.com/zblurx/certsync.git --force
     wget -q "https://github.com/ropnop/go-windapsearch/releases/latest/download/windapsearch-linux-amd64" -O "$scripts_dir/windapsearch"
     wget -q "https://github.com/ropnop/kerbrute/releases/latest/download/kerbrute_linux_amd64" -O "$scripts_dir/kerbrute"
     wget -q "https://raw.githubusercontent.com/cddmp/enum4linux-ng/master/enum4linux-ng.py" -O "$scripts_dir/enum4linux-ng.py"
@@ -34,6 +35,7 @@ install_tools() {
     wget -q "https://raw.githubusercontent.com/layer8secure/SilentHound/main/silenthound.py" -O "$scripts_dir/silenthound.py"
     wget -q "https://raw.githubusercontent.com/ShutdownRepo/targetedKerberoast/main/targetedKerberoast.py" -O "$scripts_dir/targetedKerberoast.py"
     wget -q "https://github.com/login-securite/DonPAPI/archive/master.zip" -O "$scripts_dir/DonPAPI.zip"
+    wget -q "https://raw.githubusercontent.com/kaluche/bloodhound-quickwin/main/bhqc.py" -O "$scripts_dir/bhqc.py"
     chmod +x "$scripts_dir/windapsearch"
     chmod +x "$scripts_dir/kerbrute"
     chmod +x "$scripts_dir/enum4linux-ng.py"
@@ -42,6 +44,7 @@ install_tools() {
     chmod +x "$scripts_dir/targetedKerberoast.py"
     unzip -o "$scripts_dir/DonPAPI.zip" -d $scripts_dir
     chmod +x "$scripts_dir/DonPAPI-main/DonPAPI.py"
+    chmod +x "$scripts_dir/bhqc.py"
 }
 
 install_tools || { echo -e "\n${RED}[Failure]${NC} Installing tools failed.. exiting script!\n"; exit 1; }
